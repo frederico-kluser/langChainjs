@@ -1,0 +1,32 @@
+{
+  "name": "pr-advanced-ping-35",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "tsx index.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/frederico-kluser/langChainjs.git"
+  },
+  "keywords": [],
+  "author": "Frederico Guilherme Kluser de Oliveira",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/frederico-kluser/langChainjs/issues"
+  },
+  "homepage": "https://github.com/frederico-kluser/langChainjs#readme",
+  "description": "",
+  "dependencies": {
+    "@langchain/openai": "^0.5.5",
+    "dotenv": "^16.5.0",
+    "langchain": "^0.3.21"
+  },
+  "devDependencies": {
+    "@types/node": "^22.14.1",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.3"
+  }
+}

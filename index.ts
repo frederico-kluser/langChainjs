@@ -1,4 +1,6 @@
-import { ChatOpenAI } from 'langchain/chat_models/openai';
+import 'dotenv/config';
+import { ChatOpenAI } from "@langchain/openai";
 
 const llm = new ChatOpenAI();
-await llm.invoke('Hello, world!');
+const result = await llm.invoke('Hello, world!');
+console.log(result);
