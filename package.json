@@ -7,7 +7,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "tsx index.ts",
     "openai": "tsx openai.ts",
-    "ollama": "tsx ollama.ts"
+    "ollama": "tsx ollama.ts",
+    "claude": "tsx claude.ts"
   },
   "repository": {
     "type": "git",
@@ -22,7 +23,10 @@
   "homepage": "https://github.com/frederico-kluser/langChainjs#readme",
   "description": "",
   "dependencies": {
+    "@langchain/anthropic": "^0.3.17",
     "@langchain/community": "^0.3.40",
+    "@langchain/core": "^0.3.44",
+    "@langchain/langgraph": "^0.2.64",
     "@langchain/ollama": "^0.2.0",
     "@langchain/openai": "^0.5.5",
     "dotenv": "^16.5.0",
