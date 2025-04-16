@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "tsx index.ts",
-    "start": "tsx openai.ts"
+    "openai": "tsx openai.ts",
+    "ollama": "tsx ollama.ts"
   },
   "repository": {
     "type": "git",
