@@ -18,9 +18,8 @@ const formatInstructions = parser.getFormatInstructions();
 
 // Configurando o modelo Ollama local com limite de tokens
 const llm = new ChatOllama({
-  model: "llama3_1_zero_temperature", // Usando modelo local LLaMA 3.1
-  temperature: 0.1, // Baixa temperatura para respostas mais consistentes
-  maxTokens: 1000, // Limitando a resposta a 1000 tokens
+  model: "deepseek-r1:8b", // Usando modelo local LLaMA 3.1
+  temperature: 0, // Baixa temperatura para respostas mais consistentes
 });
 
 // Criando o template do prompt com instruções de formatação
@@ -46,7 +45,10 @@ async function getStructuredResponse(question) {
     const response = await llm.invoke(prompt);
     
     // Processando a resposta para extrair o JSON
-    const parsedResponse = await parser.parse(response.content);
+    const content = typeof response.content === 'string' 
+      ? response.content 
+      : JSON.stringify(response.content);
+    const parsedResponse = await parser.parse(content);
     
     return parsedResponse;
   } catch (error) {
