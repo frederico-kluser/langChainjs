@@ -2,7 +2,7 @@
 import 'dotenv/config';
 import { ChatOllama } from "@langchain/ollama";
 import { PromptTemplate } from "@langchain/core/prompts";
-import { OutputFixingParser, StructuredOutputParser } from "langchain/output_parsers";
+import { StructuredOutputParser } from "@langchain/core/output_parsers";
 import { z } from "zod";
 
 // Definindo o esquema da resposta usando Zod para validação
@@ -12,9 +12,6 @@ const responseSchema = z.object({
 
 // Criando um parser para garantir que a saída esteja formatada como JSON
 const parser = StructuredOutputParser.fromZodSchema(responseSchema);
-
-// Parser de backup para corrigir erros de formato no JSON
-const outputFixingParser = OutputFixingParser.fromParser(parser);
 
 // Instruções de formatação para incluir no prompt
 const formatInstructions = parser.getFormatInstructions();
@@ -49,7 +46,7 @@ async function getStructuredResponse(question) {
     const response = await llm.invoke(prompt);
     
     // Processando a resposta para extrair o JSON
-    const parsedResponse = await outputFixingParser.parse(response.content);
+    const parsedResponse = await parser.parse(response.content);
     
     return parsedResponse;
   } catch (error) {
