@@ -5,9 +5,13 @@ import { PromptTemplate } from "@langchain/core/prompts";
 import { StructuredOutputParser } from "@langchain/core/output_parsers";
 import { z } from "zod";
 
+/*
+tenho que garantir que essa caceta roda offline pqp
+*/
+
 // Definindo o esquema da resposta usando Zod para validação
 const responseSchema = z.object({
-  resposta: z.string().describe("Uma resposta detalhada à pergunta, limitada a 1000 caracteres")
+  resposta: z.string().describe("A detailed answer to the question, limited to 1000 characters")
 });
 
 // Criando um parser para garantir que a saída esteja formatada como JSON
@@ -18,19 +22,17 @@ const formatInstructions = parser.getFormatInstructions();
 
 // Configurando o modelo Ollama local com limite de tokens
 const llm = new ChatOllama({
-  model: "deepseek-r1:8b", // Usando modelo local LLaMA 3.1
+  model: "rolandroland/llama3.1-uncensored:latest", // Usando modelo local LLaMA 3.1
   temperature: 0, // Baixa temperatura para respostas mais consistentes
 });
 
 // Criando o template do prompt com instruções de formatação
-const promptTemplate = PromptTemplate.fromTemplate(`
-Responda a pergunta abaixo e retorne a resposta em um formato JSON específico.
-A resposta deve ter no máximo 1000 caracteres.
+const promptTemplate = PromptTemplate.fromTemplate(`Responda à pergunta abaixo e retorne a resposta em um formato JSON específico.
+A resposta deve ter no máximo 100 caracteres.
 
 {formatInstructions}
 
-Pergunta: {question}
-`);
+Pergunta: {question}`);
 
 // Função para processar a pergunta e obter resposta
 async function getStructuredResponse(question) {
