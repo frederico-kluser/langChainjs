@@ -9,6 +9,7 @@
     "openai": "tsx openai.ts",
     "ollama": "tsx ollama.ts",
     "claude": "tsx claude.ts",
+    "deepseek": "tsc deepseek.ts",
     "ai": "claude"
   },
   "repository": {
