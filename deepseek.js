@@ -1,8 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 require("dotenv/config");
-var openai_1 = require("@langchain/openai");
-var output_parsers_1 = require("langchain/output_parsers");
+var deepseek_1 = require("@langchain/deepseek");
 // Exemplo DeepSeek com LangChain.js
 var jsonSchema = {
     name: "resposta",
@@ -19,17 +18,14 @@ var jsonSchema = {
     }
 };
 // Configurando o modelo DeepSeek (substitua pelo provider correto se houver um pacote específico)
-var llm = new openai_1.ChatOpenAI({
-    modelName: "deepseek-chat", // Nome do modelo DeepSeek
-    maxTokens: 1000,
-    openAIApiKey: process.env.DEEPSEEK_API_KEY, // Usando a key do DeepSeek
-    baseURL: "https://api.deepseek.com/v1" // Endpoint DeepSeek (ajuste se necessário)
+var llm = new deepseek_1.ChatDeepSeek({
+    model: "deepseek-chat", // ou "deepseek-reasoner" se preferir
+    temperature: 0,
+    apiKey: process.env.DEEPSEEK_API_KEY,
+    // outros parâmetros se necessário
 });
-var functionCallingModel = llm.bind({
-    functions: [jsonSchema],
-    function_call: { name: "resposta" }
-});
-var outputParser = new output_parsers_1.JsonOutputFunctionsParser();
-var chain = functionCallingModel.pipe(outputParser);
-var result = await chain.invoke('Me fale sobre os Estados Unidos');
-console.log(result);
+var res = await llm.invoke([
+    ["system", "Você é um assistente útil."],
+    ["human", "Me fale sobre os Estados Unidos"]
+]);
+console.log(res.content);
