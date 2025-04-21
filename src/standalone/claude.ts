@@ -1,6 +1,7 @@
 import 'dotenv/config';
-import { getStructuredResponse } from '../claude';
+import getAIResponse from '../index';
+import { ModelType } from '../types';
 
 const query = 'Me fale sobre os Estados Unidos';
-const result = await getStructuredResponse(query);
+const result = await getAIResponse(query, ModelType.CLAUDE);
 console.log(result);
