@@ -5,12 +5,12 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "tsx index.ts",
-    "openai": "tsx openai.ts",
-    "ollama": "tsx ollama.ts",
-    "claude": "tsx claude.ts",
-    "deepseek": "tsx deepseek.ts",
-    "gemini": "tsx gemini.ts",
+    "start": "tsx src/index.ts",
+    "openai": "tsx src/standalone/openai.ts",
+    "ollama": "tsx src/standalone/ollama.ts",
+    "claude": "tsx src/standalone/claude.ts",
+    "deepseek": "tsx src/standalone/deepseek.ts",
+    "gemini": "tsx src/standalone/gemini.ts",
     "ai": "claude"
   },
   "repository": {
