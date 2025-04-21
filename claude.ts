@@ -47,7 +47,7 @@ Nunca se desvie deste formato. Nunca inclua explicações fora do JSON.
 Se a pergunta for sobre um tema específico, forneça informações relevantes e precisas.
 Suas respostas devem ser informativas, mas limitadas a 1000 caracteres.`,
   },
-});
+} as any);
 
 // Função principal para invocar o agente
 async function getStructuredResponse(query: string) {
