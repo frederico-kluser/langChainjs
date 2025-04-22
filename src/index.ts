@@ -22,28 +22,23 @@ async function main() {
 	const query = 'Me fale sobre os Estados Unidos';
 
 	// Exemplo com schema personalizado
-	interface PaisInfo {
-		nome: string;
-		capital: string;
-		populacao: number;
-		idioma: string;
+	interface CountryInfo {
+		name: string;
 	}
 
 	console.log(`\n=== Consultando modelo: ${ModelType.OLLAMA} com schema personalizado ===`);
-	const resultadoEstruturado = await getAIResponse<PaisInfo>(
-		'Forneça informações sobre os Estados Unidos em formato estruturado',
+	const structuredResult = await getAIResponse<CountryInfo>(
+		'Provide information about the United States in a structured format',
 		ModelType.OLLAMA,
 		{
 			temperature: 0,
 			outputSchema: {
-				nome: 'Nome oficial do país',
-				capital: 'Capital do país',
-				populacao: 'População total em números',
-				idioma: 'Idioma oficial principal',
+				name: 'Official name of the country',
 			},
+			language: 'en',
 		},
 	);
-	console.log(resultadoEstruturado);
+	console.log(structuredResult);
 
 	// Outros exemplos:
 	// const openaiResult = await getAIResponse(query, ModelType.OPENAI);
