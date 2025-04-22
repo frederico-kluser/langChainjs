@@ -27,8 +27,16 @@ ${config?.outputSchema ? 'A resposta deve ser estruturada conforme solicitado.' 
 Pergunta: ${query}`]
       ]);
 
-      // Extrai a resposta JSON com base no schema solicitado
-      return extractJsonResponse<T>(response.content.toString(), config?.outputSchema);
+      const content = response.content.toString();
+      
+      // Para resposta não estruturada (texto simples)
+      if (!config?.outputSchema) {
+        // Retornar texto diretamente sem tentar extrair JSON
+        return content as T;
+      }
+      
+      // Para resposta estruturada com schema
+      return extractJsonResponse<T>(content, config?.outputSchema);
     } catch (error) {
       console.error("Erro ao invocar o modelo Claude:", error);
       return "Ocorreu um erro ao processar sua solicitação com Claude." as T;
