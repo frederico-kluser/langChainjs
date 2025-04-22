@@ -14,8 +14,47 @@ Este arquivo fornece orientações ao Claude Code (claude.ai/code) ao trabalhar 
 - **Nomenclatura**: camelCase para variáveis/funções, PascalCase para tipos/interfaces
 - **Tratamento de Erros**: Blocos try/catch para chamadas de API, mensagens de erro específicas
 - **Arquitetura**: Abordagem modular com arquivos separados para cada provedor de LLM
-- **Formato de Resposta**: Estrutura de schema JSON consistente para todas as respostas LLM
+- **Formato de Resposta**: Estrutura de schema JSON consistente para todas as respostas LLM via interface LLMResponse<T>
 - **Serviço Central**: LLM Service para gestão centralizada de todos os provedores
-- **Processamento de Resposta**: Cada provedor deve garantir que a resposta esteja no formato { resposta: string }, nunca retornando JSON serializado como string
+- **Processamento de Resposta**: Cada provedor deve garantir que a resposta esteja no formato { resposta: T }, nunca retornando JSON serializado como string
+- **Output Schemas**: Suporte para schemas personalizados para respostas estruturadas
 
-Executar verificação de tipos: `npx tsc --noEmit`
+## Modelos Suportados
+- Claude (Anthropic): `npm run claude`
+- OpenAI: `npm run openai`
+- Gemini (Google): `npm run gemini`
+- DeepSeek: `npm run deepseek`
+- Ollama (modelos locais): `npm run ollama`
+
+## Configuração de Modelos
+```typescript
+export interface ModelConfig {
+  maxTokens?: number;     // Limite de tokens na resposta
+  temperature?: number;   // Controle de criatividade (0.0-1.0)
+  outputSchema?: Record<string, any>; // Schema para respostas estruturadas
+}
+
+// Exemplo de resposta
+export interface LLMResponse<T = string> {
+  resposta: T;
+}
+```
+
+## Implementação de Schema Personalizado
+```typescript
+// Exemplo de uso com schema personalizado
+const customSchema = {
+  nome: "nome completo da pessoa",
+  idade: "idade em anos",
+  profissao: "ocupação principal"
+};
+
+const resposta = await llmService.getResponse(
+  "Dados de João Silva, 32 anos, engenheiro",
+  ModelType.CLAUDE,
+  { outputSchema: customSchema }
+);
+```
+
+## Comandos de Verificação
+- Verificação de tipos: `npx tsc --noEmit`
