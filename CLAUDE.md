@@ -1,19 +1,20 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Este arquivo fornece orientações ao Claude Code (claude.ai/code) ao trabalhar com código neste repositório.
 
-## Build Commands
-- Run app: `npm run start`
-- Run specific models: `npm run claude`, `npm run openai`, `npm run ollama`, `npm run deepseek`, `npm run gemini`
-- Shortcut command: `npm run ai` (alias for claude)
+## Comandos de Build
+- Executar aplicação: `npm run start`
+- Executar modelos específicos: `npm run claude`, `npm run openai`, `npm run ollama`, `npm run deepseek`, `npm run gemini`
+- Comando de atalho: `npm run ai` (alias para claude)
 
-## Code Style Guidelines
-- **Formatting**: 2-space indentation, semicolons, double quotes for strings, single quotes for imports
-- **Imports**: Order as environment, third-party libs, then local modules
-- **Types**: Use TypeScript strict mode, interfaces for type definitions, Zod for schema validation
-- **Naming**: camelCase for variables/functions, PascalCase for types/interfaces
-- **Error Handling**: Try/catch blocks for API calls, specific error messages
-- **Architecture**: Modular approach with separate files for each LLM provider
-- **Response Format**: Consistent JSON schema structure for all LLM responses
+## Diretrizes de Estilo de Código
+- **Formatação**: Indentação de 2 espaços, ponto e vírgula, aspas duplas para strings, aspas simples para importações
+- **Importações**: Ordem como ambiente, bibliotecas de terceiros e depois módulos locais
+- **Tipos**: Usar modo estrito do TypeScript, interfaces para definições de tipo, Zod para validação de schema
+- **Nomenclatura**: camelCase para variáveis/funções, PascalCase para tipos/interfaces
+- **Tratamento de Erros**: Blocos try/catch para chamadas de API, mensagens de erro específicas
+- **Arquitetura**: Abordagem modular com arquivos separados para cada provedor de LLM
+- **Formato de Resposta**: Estrutura de schema JSON consistente para todas as respostas LLM
+- **Serviço Central**: LLM Service para gestão centralizada de todos os provedores
 
-Run typecheck: `npx tsc --noEmit`
+Executar verificação de tipos: `npx tsc --noEmit`

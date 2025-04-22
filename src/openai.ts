@@ -23,7 +23,14 @@ export async function createOpenAIModel(options?: { maxTokens?: number; temperat
 export async function getStructuredResponse(query: string): Promise<LLMResponse> {
   try {
     const chain = await createOpenAIModel();
-    return await chain.invoke(query);
+    const result = await chain.invoke(query) as any;
+    
+    // Garantir que a resposta está no formato esperado
+    if (typeof result === 'object' && !result.resposta) {
+      return { resposta: JSON.stringify(result) };
+    }
+    
+    return result as LLMResponse;
   } catch (error) {
     console.error("Erro ao invocar o modelo OpenAI:", error);
     return { resposta: "Ocorreu um erro ao processar sua solicitação com OpenAI." };

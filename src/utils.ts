@@ -54,7 +54,17 @@ export async function extractJsonResponse(content: string | any): Promise<{ resp
       content = jsonMatch[0].replace(/```json|```/g, '').trim();
     }
     
-    return JSON.parse(content);
+    const parsedContent = JSON.parse(content);
+    
+    // Verifica se já está no formato esperado ou se precisa ser convertido
+    if (parsedContent.resposta) {
+      return parsedContent;
+    } else {
+      // Converte o objeto para string formatada se não estiver no formato esperado
+      return { 
+        resposta: JSON.stringify(parsedContent, null, 2)
+      };
+    }
   } catch (error) {
     console.error("Erro ao analisar JSON:", error);
     return { 
