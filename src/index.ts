@@ -45,13 +45,6 @@ async function main() {
 	);
 	console.log(resultadoEstruturado);
 
-	console.log(`\n=== Consultando modelo: ${ModelType.CLAUDE} com texto simples ===`);
-	const respostaTexto = await getAIResponse<string>(
-		query,
-		ModelType.CLAUDE,
-	);
-	console.log(respostaTexto);
-
 	// Outros exemplos:
 	// const openaiResult = await getAIResponse(query, ModelType.OPENAI);
 	// const geminiResult = await getAIResponse(query, ModelType.GEMINI);
