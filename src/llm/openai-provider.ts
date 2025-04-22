@@ -2,7 +2,7 @@ import 'dotenv/config';
 import { ChatOpenAI } from "@langchain/openai";
 import { JsonOutputFunctionsParser } from "langchain/output_parsers";
 import { ILLMProvider, LLMResponse, ModelConfig } from '../types';
-import { jsonSchema } from '../utils';
+import { jsonSchema, createCustomJsonSchema, extractJsonResponse } from '../utils';
 
 class OpenAIProvider implements ILLMProvider {
   async createModel(config?: ModelConfig) {
@@ -12,8 +12,13 @@ class OpenAIProvider implements ILLMProvider {
       temperature: config?.temperature || 0,
     });
 
+    // Usa schema personalizado se fornecido, ou o schema padrão
+    const schema = config?.outputSchema 
+      ? createCustomJsonSchema(config.outputSchema)
+      : jsonSchema;
+
     const functionCallingModel = llm.bind({
-      functions: [jsonSchema],
+      functions: [schema],
       function_call: { name: "resposta" }
     });
 
@@ -21,20 +26,25 @@ class OpenAIProvider implements ILLMProvider {
     return functionCallingModel.pipe(outputParser);
   }
 
-  async getResponse(query: string, config?: ModelConfig): Promise<LLMResponse> {
+  async getResponse<T = string>(query: string, config?: ModelConfig): Promise<LLMResponse<T>> {
     try {
       const chain = await this.createModel(config);
       const result = await chain.invoke(query) as any;
       
-      // Garantir que a resposta está no formato esperado
-      if (typeof result === 'object' && !result.resposta) {
-        return { resposta: JSON.stringify(result) };
+      // Se for uma resposta estruturada
+      if (config?.outputSchema && result.resposta && typeof result.resposta === 'object') {
+        return result as LLMResponse<T>;
       }
       
-      return result as LLMResponse;
+      // Garantir que a resposta está no formato esperado
+      if (typeof result === 'object' && !result.resposta) {
+        return { resposta: result as T };
+      }
+      
+      return result as LLMResponse<T>;
     } catch (error) {
       console.error("Erro ao invocar o modelo OpenAI:", error);
-      return { resposta: "Ocorreu um erro ao processar sua solicitação com OpenAI." };
+      return { resposta: "Ocorreu um erro ao processar sua solicitação com OpenAI." as T };
     }
   }
 }

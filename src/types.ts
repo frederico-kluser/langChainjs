@@ -1,10 +1,11 @@
-export interface LLMResponse {
-  resposta: string;
+export interface LLMResponse<T = string> {
+  resposta: T;
 }
 
 export interface ModelConfig {
   maxTokens?: number;
   temperature?: number;
+  outputSchema?: Record<string, any>;
 }
 
 export enum ModelType {
@@ -17,9 +18,9 @@ export enum ModelType {
 
 export interface ILLMProvider {
   createModel(config?: ModelConfig): Promise<any>;
-  getResponse(query: string, config?: ModelConfig): Promise<LLMResponse>;
+  getResponse<T = string>(query: string, config?: ModelConfig): Promise<LLMResponse<T>>;
 }
 
 export interface IResponseFormatter {
-  formatResponse(rawResponse: any): Promise<LLMResponse>;
+  formatResponse<T = string>(rawResponse: any, outputSchema?: Record<string, any>): Promise<LLMResponse<T>>;
 }

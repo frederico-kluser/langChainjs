@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import { ChatDeepSeek } from "@langchain/deepseek";
 import { ILLMProvider, LLMResponse, ModelConfig } from '../types';
-import { systemPrompt, extractJsonResponse } from '../utils';
+import { getSystemPrompt, extractJsonResponse } from '../utils';
 
 class DeepSeekProvider implements ILLMProvider {
   async createModel(config?: ModelConfig) {
@@ -12,22 +12,25 @@ class DeepSeekProvider implements ILLMProvider {
     });
   }
 
-  async getResponse(query: string, config?: ModelConfig): Promise<LLMResponse> {
+  async getResponse<T = string>(query: string, config?: ModelConfig): Promise<LLMResponse<T>> {
     try {
       const llm = await this.createModel(config);
       
+      // Usa o prompt personalizado ou o padrão
+      const customPrompt = getSystemPrompt(config?.outputSchema);
+      
       const response = await llm.invoke([
-        ["system", systemPrompt],
+        ["system", customPrompt],
         ["human", `Responda à pergunta abaixo e retorne a resposta em um formato JSON específico.
-A resposta deve ter no máximo 1000 caracteres.
+A resposta deve ser estruturada conforme solicitado.
 
 Pergunta: ${query}`]
       ]);
 
-      return extractJsonResponse(response.content);
+      return extractJsonResponse<T>(response.content.toString(), config?.outputSchema);
     } catch (error) {
       console.error("Erro ao invocar o modelo DeepSeek:", error);
-      return { resposta: "Ocorreu um erro ao processar sua solicitação com DeepSeek." };
+      return { resposta: "Ocorreu um erro ao processar sua solicitação com DeepSeek." as T };
     }
   }
 }

@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import { ChatOllama } from '@langchain/ollama';
 import { ILLMProvider, LLMResponse, ModelConfig } from '../types';
-import { promptTemplate, parser } from '../utils';
+import { promptTemplate, parser, extractJsonResponse } from '../utils';
 
 class OllamaProvider implements ILLMProvider {
   async createModel(config?: ModelConfig) {
@@ -11,10 +11,11 @@ class OllamaProvider implements ILLMProvider {
     });
   }
 
-  async getResponse(query: string, config?: ModelConfig): Promise<LLMResponse> {
+  async getResponse<T = string>(query: string, config?: ModelConfig): Promise<LLMResponse<T>> {
     try {
       const llm = await this.createModel(config);
       
+      // Para o Ollama, usamos o promptTemplate que funciona melhor com este modelo
       const prompt = await promptTemplate.format({
         question: query,
         formatInstructions: parser.getFormatInstructions(),
@@ -25,10 +26,15 @@ class OllamaProvider implements ILLMProvider {
         ? response.content 
         : JSON.stringify(response.content);
       
-      return await parser.parse(content);
+      if (config?.outputSchema) {
+        return extractJsonResponse<T>(content, config.outputSchema);
+      } else {
+        const parsed = await parser.parse(content);
+        return parsed as LLMResponse<T>;
+      }
     } catch (error) {
       console.error('Erro ao processar a resposta com Ollama:', error);
-      return { resposta: 'Ocorreu um erro ao processar a resposta com Ollama.' };
+      return { resposta: 'Ocorreu um erro ao processar a resposta com Ollama.' as T };
     }
   }
 }
