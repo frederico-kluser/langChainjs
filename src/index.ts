@@ -17,11 +17,12 @@ export async function getAIResponse(prompt: string, modelType: ModelType = Model
 async function main() {
 	const query = 'Me fale sobre os Estados Unidos';
 
-	console.log(`\n=== Consultando modelo: ${ModelType.DEEPSEEK} ===`);
-	const result = await getAIResponse(query, ModelType.DEEPSEEK);
+	console.log(`\n=== Consultando modelo: ${ModelType.CLAUDE} ===`);
+	const result = await getAIResponse(query, ModelType.CLAUDE);
 	console.log(result);
 
 	// Exemplo de como selecionar diferentes modelos:
+	// const claudeResult = await getAIResponse(query, ModelType.CLAUDE);
 	// const openaiResult = await getAIResponse(query, ModelType.OPENAI);
 	// const geminiResult = await getAIResponse(query, ModelType.GEMINI);
 	// const deepseekResult = await getAIResponse(query, ModelType.DEEPSEEK);
