@@ -3,6 +3,22 @@ import { ChatDeepSeek } from "@langchain/deepseek";
 import { ILLMProvider, LLMResponse, ModelConfig } from '../types';
 import { getSystemPrompt, extractJsonResponse } from '../utils';
 
+// Mensagens por idioma
+const messages = {
+  pt: {
+    humanPromptIntro: "Responda à pergunta abaixo e retorne a resposta em um formato JSON específico.",
+    structuredResponse: "A resposta deve ser estruturada conforme solicitado.",
+    questionPrefix: "Pergunta:",
+    error: "Ocorreu um erro ao processar sua solicitação com DeepSeek."
+  },
+  en: {
+    humanPromptIntro: "Answer the question below and return the response in a specific JSON format.",
+    structuredResponse: "The response must be structured as requested.",
+    questionPrefix: "Question:",
+    error: "An error occurred while processing your request with DeepSeek."
+  }
+};
+
 class DeepSeekProvider implements ILLMProvider {
   async createModel(config?: ModelConfig) {
     return new ChatDeepSeek({
@@ -14,23 +30,29 @@ class DeepSeekProvider implements ILLMProvider {
 
   async getResponse<T = string>(query: string, config?: ModelConfig): Promise<LLMResponse<T>> {
     try {
+      // Definir idioma padrão como português se não especificado
+      const language = config?.language || 'pt';
+      const lang = language === 'en' ? 'en' : 'pt';
+      
       const llm = await this.createModel(config);
       
       // Usa o prompt personalizado ou o padrão
-      const customPrompt = getSystemPrompt(config?.outputSchema);
+      const customPrompt = getSystemPrompt(config?.outputSchema, language);
+      const msg = messages[lang];
       
       const response = await llm.invoke([
         ["system", customPrompt],
-        ["human", `Responda à pergunta abaixo e retorne a resposta em um formato JSON específico.
-A resposta deve ser estruturada conforme solicitado.
+        ["human", `${msg.humanPromptIntro}
+${msg.structuredResponse}
 
-Pergunta: ${query}`]
+${msg.questionPrefix} ${query}`]
       ]);
 
-      return extractJsonResponse<T>(response.content.toString(), config?.outputSchema);
+      return extractJsonResponse<T>(response.content.toString(), config?.outputSchema, language);
     } catch (error) {
-      console.error("Erro ao invocar o modelo DeepSeek:", error);
-      return "Ocorreu um erro ao processar sua solicitação com DeepSeek." as T;
+      const lang = (config?.language === 'en') ? 'en' : 'pt';
+      console.error(lang === 'pt' ? "Erro ao invocar o modelo DeepSeek:" : "Error invoking the DeepSeek model:", error);
+      return messages[lang].error as T;
     }
   }
 }

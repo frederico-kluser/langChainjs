@@ -4,6 +4,7 @@ export interface ModelConfig {
   maxTokens?: number;
   temperature?: number;
   outputSchema?: Record<string, any>;
+  language?: string;
 }
 
 export enum ModelType {
