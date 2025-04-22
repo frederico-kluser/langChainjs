@@ -21,13 +21,15 @@ export async function getAIResponse<T = string>(
 async function main() {
 	const query = 'Me fale sobre os Estados Unidos';
 
-	console.log(`\n=== Consultando modelo: ${ModelType.OLLAMA} ===`);
-
 	// Exemplo com schema personalizado
 	interface PaisInfo {
 		nome: string;
+		capital: string;
+		populacao: number;
+		idioma: string;
 	}
 
+	console.log(`\n=== Consultando modelo: ${ModelType.OLLAMA} com schema personalizado ===`);
 	const resultadoEstruturado = await getAIResponse<PaisInfo>(
 		'Forneça informações sobre os Estados Unidos em formato estruturado',
 		ModelType.OLLAMA,
@@ -35,18 +37,18 @@ async function main() {
 			temperature: 0,
 			outputSchema: {
 				nome: 'Nome oficial do país',
+				capital: 'Capital do país',
+				populacao: 'População total em números',
+				idioma: 'Idioma oficial principal',
 			},
 		},
 	);
-
 	console.log(resultadoEstruturado);
 
-	// Exemplo de como selecionar diferentes modelos:
-	// const claudeResult = await getAIResponse(query, ModelType.CLAUDE);
+	// Outros exemplos:
 	// const openaiResult = await getAIResponse(query, ModelType.OPENAI);
 	// const geminiResult = await getAIResponse(query, ModelType.GEMINI);
 	// const deepseekResult = await getAIResponse(query, ModelType.DEEPSEEK);
-	// const ollamaResult = await getAIResponse(query, ModelType.OLLAMA);
 }
 
 // Executar como script standalone

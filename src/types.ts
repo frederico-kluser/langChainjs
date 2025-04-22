@@ -1,6 +1,4 @@
-export interface LLMResponse<T = string> {
-  resposta: T;
-}
+export type LLMResponse<T = string> = T;
 
 export interface ModelConfig {
   maxTokens?: number;
