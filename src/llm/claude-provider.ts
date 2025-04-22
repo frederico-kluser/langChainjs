@@ -1,59 +1,57 @@
 import 'dotenv/config';
 import { ChatAnthropic } from "@langchain/anthropic";
-import { createReactAgent } from "@langchain/langgraph/prebuilt";
-import { tool } from "@langchain/core/tools";
-import { z } from "zod";
 import { ILLMProvider, LLMResponse, ModelConfig } from '../types';
-import { systemPrompt, extractJsonResponse } from '../utils';
+import { systemPrompt } from '../utils';
 
 class ClaudeProvider implements ILLMProvider {
   async createModel(config?: ModelConfig) {
-    const model = new ChatAnthropic({
+    return new ChatAnthropic({
       model: "claude-3-sonnet-20240229",
       maxTokens: config?.maxTokens || 1000,
       temperature: config?.temperature || 0.1,
     });
-
-    const structuredResponse = tool(
-      async ({ query }) => {
-        return `Resposta estruturada para: "${query}"`;
-      },
-      {
-        name: "estruturar_resposta",
-        description: "Estrutura a resposta em formato JSON com informações sobre o tema solicitado",
-        schema: z.object({
-          query: z.string().describe("A pergunta ou tema que precisa de uma resposta estruturada"),
-        }),
-      }
-    );
-
-    const agent = createReactAgent({
-      llm: model,
-      tools: [structuredResponse],
-      agentState: {
-        createSystemPrompt: () => systemPrompt,
-      },
-    } as any);
-
-    return agent;
   }
 
   async getResponse(query: string, config?: ModelConfig): Promise<LLMResponse> {
     try {
-      const agent = await this.createModel(config);
-      const result = await agent.invoke({
-        messages: [
-          {
-            role: "user",
-            content: query,
-          },
-        ],
-      });
+      const model = await this.createModel(config);
       
-      const lastMessage = result.messages[result.messages.length - 1];
-      return extractJsonResponse(lastMessage.content.toString());
+      const response = await model.invoke([
+        ["system", systemPrompt],
+        ["human", `Responda à pergunta abaixo e retorne a resposta em um formato JSON específico.
+A resposta deve ter no máximo 1000 caracteres.
+
+Pergunta: ${query}`]
+      ]);
+
+      try {
+        // Convertendo para string para garantir compatibilidade
+        const contentStr = response.content.toString();
+        
+        // Procura por padrões JSON na resposta
+        const jsonMatch = contentStr.match(/```json\s*([\s\S]*?)\s*```/) || 
+                         contentStr.match(/{[\s\S]*}/);
+        
+        if (jsonMatch) {
+          const jsonContent = jsonMatch[0].replace(/```json|```/g, '').trim();
+          const parsedJson = JSON.parse(jsonContent);
+          
+          if (parsedJson.resposta) {
+            return parsedJson;
+          }
+        }
+
+        // Se não conseguiu extrair JSON válido ou não tem campo 'resposta', 
+        // retorna o texto diretamente
+        return { 
+          resposta: contentStr.replace(/```json|```/g, '').trim()
+        };
+      } catch (jsonError) {
+        // Se falhar ao processar como JSON, retorna o texto bruto como string
+        return { resposta: response.content.toString() };
+      }
     } catch (error) {
-      console.error("Erro ao invocar o agente Claude:", error);
+      console.error("Erro ao invocar o modelo Claude:", error);
       return { resposta: "Ocorreu um erro ao processar sua solicitação com Claude." };
     }
   }

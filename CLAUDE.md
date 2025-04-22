@@ -16,5 +16,6 @@ Este arquivo fornece orientações ao Claude Code (claude.ai/code) ao trabalhar 
 - **Arquitetura**: Abordagem modular com arquivos separados para cada provedor de LLM
 - **Formato de Resposta**: Estrutura de schema JSON consistente para todas as respostas LLM
 - **Serviço Central**: LLM Service para gestão centralizada de todos os provedores
+- **Processamento de Resposta**: Cada provedor deve garantir que a resposta esteja no formato { resposta: string }, nunca retornando JSON serializado como string
 
 Executar verificação de tipos: `npx tsc --noEmit`
