@@ -18,6 +18,7 @@ Este arquivo fornece orientações ao Claude Code (claude.ai/code) ao trabalhar 
 - **Serviço Central**: LLM Service para gestão centralizada de todos os provedores
 - **Processamento de Resposta**: Cada provedor deve retornar a resposta diretamente, sem encapsular em um objeto adicional
 - **Output Schemas**: Suporte para schemas personalizados para respostas estruturadas
+- **Internacionalização**: Suporte para múltiplos idiomas nos prompts e respostas (português e inglês)
 
 ## Modelos Suportados
 - Claude (Anthropic): `npm run claude`
@@ -32,6 +33,7 @@ export interface ModelConfig {
   maxTokens?: number;     // Limite de tokens na resposta
   temperature?: number;   // Controle de criatividade (0.0-1.0)
   outputSchema?: Record<string, any>; // Schema para respostas estruturadas
+  language?: string;      // Idioma para prompts e respostas ('pt' ou 'en')
 }
 
 // Tipo de resposta
@@ -61,6 +63,37 @@ const resposta = await llmService.getResponse<{
 // Acesso direto às propriedades
 console.log(resposta.nome); // "João Silva"
 console.log(resposta.idade); // 32
+```
+
+## Suporte a Múltiplos Idiomas
+```typescript
+// Exemplo em português (padrão)
+const resposta = await llmService.getResponse(
+  "Qual a capital do Brasil?",
+  ModelType.CLAUDE
+);
+
+// Exemplo em inglês
+const response = await llmService.getResponse(
+  "What is the capital of Brazil?",
+  ModelType.CLAUDE,
+  { language: 'en' }
+);
+
+// Com schema personalizado em inglês
+const customSchema = {
+  capital: "name of the capital city",
+  country: "name of the country"
+};
+
+const result = await llmService.getResponse<{capital: string, country: string}>(
+  "What is the capital of Brazil?",
+  ModelType.CLAUDE,
+  { 
+    language: 'en',
+    outputSchema: customSchema
+  }
+);
 ```
 
 ## Comandos de Verificação

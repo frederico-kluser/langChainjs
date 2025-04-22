@@ -1,5 +1,5 @@
 {
-  "name": "pr-advanced-ping-35",
+  "name": "langchaints",
   "version": "1.0.0",
   "main": "index.js",
   "type": "module",
@@ -15,16 +15,26 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/frederico-kluser/langChainjs.git"
+    "url": "git+https://github.com/frederico-kluser/langchaints.git"
   },
-  "keywords": [],
+  "keywords": [
+    "langchain",
+    "typescript",
+    "openai",
+    "claude",
+    "gemini",
+    "deepseek",
+    "ollama",
+    "llm",
+    "ai"
+  ],
   "author": "Frederico Guilherme Kluser de Oliveira",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/frederico-kluser/langChainjs/issues"
+    "url": "https://github.com/frederico-kluser/langchaints/issues"
   },
-  "homepage": "https://github.com/frederico-kluser/langChainjs#readme",
-  "description": "",
+  "homepage": "https://github.com/frederico-kluser/langchaints#readme",
+  "description": "A TypeScript library for interacting with various LLM providers through LangChain with simple, consistent API",
   "dependencies": {
     "@langchain/anthropic": "^0.3.17",
     "@langchain/community": "^0.3.40",
