@@ -24,9 +24,10 @@ export async function getStructuredResponse(query: string): Promise<LLMResponse>
       ? response.content 
       : JSON.stringify(response.content);
     
-    return await parser.parse(content);
+    const parsed = await parser.parse(content);
+    return parsed.resposta;
   } catch (error) {
     console.error('Erro ao processar a resposta com Ollama:', error);
-    return { resposta: 'Ocorreu um erro ao processar a resposta com Ollama.' };
+    return 'Ocorreu um erro ao processar a resposta com Ollama.';
   }
 }

@@ -30,11 +30,11 @@ class OllamaProvider implements ILLMProvider {
         return extractJsonResponse<T>(content, config.outputSchema);
       } else {
         const parsed = await parser.parse(content);
-        return parsed as LLMResponse<T>;
+        return parsed.resposta as T;
       }
     } catch (error) {
       console.error('Erro ao processar a resposta com Ollama:', error);
-      return { resposta: 'Ocorreu um erro ao processar a resposta com Ollama.' as T };
+      return 'Ocorreu um erro ao processar a resposta com Ollama.' as T;
     }
   }
 }

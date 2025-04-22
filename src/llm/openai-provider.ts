@@ -31,20 +31,24 @@ class OpenAIProvider implements ILLMProvider {
       const chain = await this.createModel(config);
       const result = await chain.invoke(query) as any;
       
-      // Se for uma resposta estruturada
-      if (config?.outputSchema && result.resposta && typeof result.resposta === 'object') {
-        return result as LLMResponse<T>;
+      // Para schemas personalizados
+      if (config?.outputSchema) {
+        if (result.resposta && typeof result.resposta === 'object') {
+          return result.resposta as T;
+        }
+        // Já está no formato correto
+        return result as T;
       }
       
-      // Garantir que a resposta está no formato esperado
-      if (typeof result === 'object' && !result.resposta) {
-        return { resposta: result as T };
+      // Para resposta de texto simples
+      if (result.resposta && typeof result.resposta === 'string') {
+        return result.resposta as T;
       }
       
-      return result as LLMResponse<T>;
+      return result as T;
     } catch (error) {
       console.error("Erro ao invocar o modelo OpenAI:", error);
-      return { resposta: "Ocorreu um erro ao processar sua solicitação com OpenAI." as T };
+      return "Ocorreu um erro ao processar sua solicitação com OpenAI." as T;
     }
   }
 }

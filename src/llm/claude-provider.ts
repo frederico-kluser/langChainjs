@@ -21,8 +21,8 @@ class ClaudeProvider implements ILLMProvider {
       
       const response = await model.invoke([
         ["system", customPrompt],
-        ["human", `Responda à pergunta abaixo e retorne a resposta em um formato JSON específico.
-A resposta deve ser estruturada conforme solicitado.
+        ["human", `Responda à pergunta abaixo.
+${config?.outputSchema ? 'A resposta deve ser estruturada conforme solicitado.' : 'Responda de forma clara e concisa.'}
 
 Pergunta: ${query}`]
       ]);
@@ -31,7 +31,7 @@ Pergunta: ${query}`]
       return extractJsonResponse<T>(response.content.toString(), config?.outputSchema);
     } catch (error) {
       console.error("Erro ao invocar o modelo Claude:", error);
-      return { resposta: "Ocorreu um erro ao processar sua solicitação com Claude." as T };
+      return "Ocorreu um erro ao processar sua solicitação com Claude." as T;
     }
   }
 }

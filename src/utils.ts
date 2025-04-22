@@ -12,27 +12,22 @@ export const formatInstructions = parser.getFormatInstructions();
 export function getSystemPrompt(outputSchema?: Record<string, any>): string {
   if (!outputSchema) {
     return `Você é um assistente útil que responde perguntas de forma clara e concisa.
-Você SEMPRE deve retornar suas respostas no seguinte formato JSON:
-{
-  "resposta": "Sua resposta aqui com no máximo 1000 caracteres"
-}
+Você SEMPRE deve retornar suas respostas como uma string simples, limitada a 1000 caracteres.
 
-Nunca se desvie deste formato. Nunca inclua explicações fora do JSON.
+Nunca inclua explicações fora da resposta solicitada.
 Se a pergunta for sobre um tema específico, forneça informações relevantes e precisas.
 Suas respostas devem ser informativas, mas limitadas a 1000 caracteres.`;
   }
 
   // Constrói o prompt para formato de saída personalizado
   const schemaFields = Object.entries(outputSchema)
-    .map(([key, desc]) => `    "${key}": ${typeof desc === 'string' ? `"${desc}"` : desc}`)
+    .map(([key, desc]) => `  "${key}": ${typeof desc === 'string' ? `"${desc}"` : desc}`)
     .join(',\n');
 
   return `Você é um assistente útil que responde perguntas de forma estruturada.
 Você SEMPRE deve retornar suas respostas no seguinte formato JSON:
 {
-  "resposta": {
 ${schemaFields}
-  }
 }
 
 Nunca se desvie deste formato. Nunca inclua explicações fora do JSON.
@@ -53,14 +48,8 @@ export const jsonSchema = {
   name: "resposta",
   description: "Forneça uma resposta clara e concisa à pergunta",
   parameters: {
-    type: "object",
-    properties: {
-      resposta: {
-        type: "string",
-        description: "A resposta detalhada à pergunta, limitada a 1000 caracteres"
-      }
-    },
-    required: ["resposta"]
+    type: "string",
+    description: "A resposta detalhada à pergunta, limitada a 1000 caracteres"
   }
 };
 
@@ -98,14 +87,8 @@ export function createCustomJsonSchema(outputSchema: Record<string, any>) {
     description: "Forneça uma resposta estruturada à pergunta",
     parameters: {
       type: "object",
-      properties: {
-        resposta: {
-          type: "object",
-          properties: properties,
-          required: Object.keys(properties)
-        }
-      },
-      required: ["resposta"]
+      properties: properties,
+      required: Object.keys(properties)
     }
   };
 }
@@ -113,7 +96,7 @@ export function createCustomJsonSchema(outputSchema: Record<string, any>) {
 export async function extractJsonResponse<T = string>(
   content: string | any, 
   outputSchema?: Record<string, any>
-): Promise<{ resposta: T }> {
+): Promise<T> {
   try {
     if (typeof content !== 'string') {
       content = JSON.stringify(content);
@@ -128,33 +111,29 @@ export async function extractJsonResponse<T = string>(
     
     const parsedContent = JSON.parse(content);
     
-    // Verifica se já está no formato esperado
-    if (parsedContent.resposta) {
-      return parsedContent as { resposta: T };
-    } 
-    
-    // Verifica se este é o conteúdo estruturado que deveria estar dentro de resposta
+    // Verifica se já está em formato de objeto e tem o schema esperado
     if (outputSchema && typeof parsedContent === 'object') {
       const schemaKeys = Object.keys(outputSchema);
       const contentKeys = Object.keys(parsedContent);
       
-      // Se o objeto analisado contém a maioria das chaves do schema, assume que é o conteúdo estruturado
+      // Se o objeto analisado contém a maioria das chaves do schema
       const matchingKeys = schemaKeys.filter(key => contentKeys.includes(key));
       if (matchingKeys.length >= schemaKeys.length * 0.5) {
-        return { resposta: parsedContent as T };
+        return parsedContent as T;
       }
     }
     
-    // Se não está em nenhum formato reconhecido, converte para string
-    return { 
-      resposta: (typeof parsedContent === 'string' 
-        ? parsedContent 
-        : JSON.stringify(parsedContent, null, 2)) as T
-    };
+    // Para resposta string simples
+    if (!outputSchema && typeof parsedContent === 'object' && parsedContent.resposta) {
+      return parsedContent.resposta as T;
+    }
+    
+    // Se não está em nenhum formato reconhecido, retorna como está
+    return (typeof parsedContent === 'string' 
+      ? parsedContent as T
+      : parsedContent as T);
   } catch (error) {
     console.error("Erro ao analisar JSON:", error);
-    return { 
-      resposta: "Ocorreu um erro ao processar a resposta em formato JSON." as T
-    };
+    return "Ocorreu um erro ao processar a resposta em formato JSON." as T;
   }
 }

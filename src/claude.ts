@@ -53,6 +53,6 @@ export async function getStructuredResponse(query: string): Promise<LLMResponse>
     return extractJsonResponse(lastMessage.content.toString());
   } catch (error) {
     console.error("Erro ao invocar o agente Claude:", error);
-    return { resposta: "Ocorreu um erro ao processar sua solicitação com Claude." };
+    return "Ocorreu um erro ao processar sua solicitação com Claude.";
   }
 }

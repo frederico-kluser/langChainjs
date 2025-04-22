@@ -30,7 +30,7 @@ Pergunta: ${query}`]
       return extractJsonResponse<T>(response.content.toString(), config?.outputSchema);
     } catch (error) {
       console.error("Erro ao invocar o modelo Gemini:", error);
-      return { resposta: "Ocorreu um erro ao processar sua solicitação com Gemini." as T };
+      return "Ocorreu um erro ao processar sua solicitação com Gemini." as T;
     }
   }
 }

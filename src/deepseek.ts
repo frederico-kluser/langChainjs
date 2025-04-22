@@ -26,6 +26,6 @@ Pergunta: ${query}`]
     return extractJsonResponse(response.content);
   } catch (error) {
     console.error("Erro ao invocar o modelo DeepSeek:", error);
-    return { resposta: "Ocorreu um erro ao processar sua solicitação com DeepSeek." };
+    return "Ocorreu um erro ao processar sua solicitação com DeepSeek.";
   }
 }

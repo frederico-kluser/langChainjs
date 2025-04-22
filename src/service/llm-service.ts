@@ -12,9 +12,7 @@ class LLMService {
       return await provider.getResponse<T>(prompt, config);
     } catch (error) {
       console.error(`Erro ao processar a resposta com o modelo ${modelType}:`, error);
-      return { 
-        resposta: `Ocorreu um erro ao processar a solicitação com o modelo ${modelType}.` 
-      } as LLMResponse<T>;
+      return `Ocorreu um erro ao processar a solicitação com o modelo ${modelType}.` as T;
     }
   }
 }

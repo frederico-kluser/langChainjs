@@ -21,7 +21,7 @@ export async function getAIResponse<T = string>(
 async function main() {
 	const query = 'Me fale sobre os Estados Unidos';
 
-	console.log(`\n=== Consultando modelo: ${ModelType.OLLAMA} ===`);
+	console.log(`\n=== Consultando modelo: ${ModelType.GEMINI} ===`);
 
 	// Exemplo com schema personalizado
 	interface PaisInfo {
@@ -30,7 +30,7 @@ async function main() {
 
 	const resultadoEstruturado = await getAIResponse<PaisInfo>(
 		'Forneça informações sobre os Estados Unidos em formato estruturado',
-		ModelType.OLLAMA,
+		ModelType.GEMINI,
 		{
 			temperature: 0,
 			outputSchema: {

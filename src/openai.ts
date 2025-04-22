@@ -26,13 +26,13 @@ export async function getStructuredResponse(query: string): Promise<LLMResponse>
     const result = await chain.invoke(query) as any;
     
     // Garantir que a resposta está no formato esperado
-    if (typeof result === 'object' && !result.resposta) {
-      return { resposta: JSON.stringify(result) };
+    if (typeof result === 'object' && result.resposta) {
+      return result.resposta;
     }
     
-    return result as LLMResponse;
+    return typeof result === 'string' ? result : JSON.stringify(result);
   } catch (error) {
     console.error("Erro ao invocar o modelo OpenAI:", error);
-    return { resposta: "Ocorreu um erro ao processar sua solicitação com OpenAI." };
+    return "Ocorreu um erro ao processar sua solicitação com OpenAI.";
   }
 }

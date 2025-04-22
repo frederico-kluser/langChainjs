@@ -26,6 +26,6 @@ Pergunta: ${query}`]
     return extractJsonResponse(response.content);
   } catch (error) {
     console.error("Erro ao invocar o modelo Gemini:", error);
-    return { resposta: "Ocorreu um erro ao processar sua solicitação com Gemini." };
+    return "Ocorreu um erro ao processar sua solicitação com Gemini.";
   }
 }

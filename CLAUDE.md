@@ -14,9 +14,9 @@ Este arquivo fornece orientações ao Claude Code (claude.ai/code) ao trabalhar 
 - **Nomenclatura**: camelCase para variáveis/funções, PascalCase para tipos/interfaces
 - **Tratamento de Erros**: Blocos try/catch para chamadas de API, mensagens de erro específicas
 - **Arquitetura**: Abordagem modular com arquivos separados para cada provedor de LLM
-- **Formato de Resposta**: Estrutura de schema JSON consistente para todas as respostas LLM via interface LLMResponse<T>
+- **Formato de Resposta**: Retornar diretamente o valor correspondente ao tipo genérico T
 - **Serviço Central**: LLM Service para gestão centralizada de todos os provedores
-- **Processamento de Resposta**: Cada provedor deve garantir que a resposta esteja no formato { resposta: T }, nunca retornando JSON serializado como string
+- **Processamento de Resposta**: Cada provedor deve retornar a resposta diretamente, sem encapsular em um objeto adicional
 - **Output Schemas**: Suporte para schemas personalizados para respostas estruturadas
 
 ## Modelos Suportados
@@ -34,10 +34,8 @@ export interface ModelConfig {
   outputSchema?: Record<string, any>; // Schema para respostas estruturadas
 }
 
-// Exemplo de resposta
-export interface LLMResponse<T = string> {
-  resposta: T;
-}
+// Tipo de resposta
+export type LLMResponse<T = string> = T;
 ```
 
 ## Implementação de Schema Personalizado
@@ -49,11 +47,20 @@ const customSchema = {
   profissao: "ocupação principal"
 };
 
-const resposta = await llmService.getResponse(
+// T será inferido como o tipo do objeto personalizado
+const resposta = await llmService.getResponse<{ 
+  nome: string, 
+  idade: number, 
+  profissao: string 
+}>(
   "Dados de João Silva, 32 anos, engenheiro",
   ModelType.CLAUDE,
   { outputSchema: customSchema }
 );
+
+// Acesso direto às propriedades
+console.log(resposta.nome); // "João Silva"
+console.log(resposta.idade); // 32
 ```
 
 ## Comandos de Verificação
