@@ -12,6 +12,7 @@
     "deepseek": "tsx src/standalone/deepseek.ts",
     "gemini": "tsx src/standalone/gemini.ts",
     "test:all": "tsx testes/runAll.ts",
+    "test:json": "tsx testes/runAllJSON.ts",
     "ai": "claude"
   },
   "repository": {
