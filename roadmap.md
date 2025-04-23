@@ -2,3 +2,5 @@
 [ ] verificador de keys
 [ ] pesquisa online
 [ ] pensamento profundo
+-
+!conseguir separar vozes com base no bubble light das ferramentas de meeting

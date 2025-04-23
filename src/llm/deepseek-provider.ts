@@ -20,15 +20,15 @@ const messages = {
 };
 
 class DeepSeekProvider implements ILLMProvider {
-  async createModel(config?: ModelConfig) {
+  async createModel(config: ModelConfig) {
     return new ChatDeepSeek({
-      model: "deepseek-chat",
+      model: config?.model?.name || "deepseek-chat",
       temperature: config?.temperature || 0,
       apiKey: process.env.DEEPSEEK_API_KEY,
     });
   }
 
-  async getResponse<T = string>(query: string, config?: ModelConfig): Promise<LLMResponse<T>> {
+  async getResponse<T = string>(query: string, config: ModelConfig): Promise<LLMResponse<T>> {
     try {
       // Definir idioma padrão como português se não especificado
       const language = config?.language || 'pt';

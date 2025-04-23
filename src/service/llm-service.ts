@@ -17,21 +17,23 @@ const errorMessages = {
 class LLMService {
   async getResponse<T = string>(
     prompt: string, 
-    modelType: ModelType = ModelType.CLAUDE,
-    config?: ModelConfig
+    config: ModelConfig
   ): Promise<LLMResponse<T>> {
     // Definir idioma padrão como português se não especificado
-    const language = config?.language || 'pt';
+    const language = config.language || 'pt';
     const lang = language === 'en' ? 'en' : 'pt';
+    
+    // Determinar o provider a partir do config.model
+    const providerType = config.model.provider;
     
     // Criar e iniciar o spinner
     const spinner = ora({
-      text: errorMessages[lang].loading(modelType),
+      text: errorMessages[lang].loading(providerType),
       color: 'blue'
     }).start();
     
     try {
-      const provider = LLMFactory.getProvider(modelType);
+      const provider = LLMFactory.getProvider(providerType);
       const response = await provider.getResponse<T>(prompt, config);
       
       // Parar o spinner com sucesso
@@ -43,10 +45,10 @@ class LLMService {
       spinner.fail(lang === 'pt' ? 'Erro ao gerar resposta' : 'Error generating response');
       
       console.error(
-        `${lang === 'pt' ? 'Erro ao processar a resposta com o modelo' : 'Error processing response with model'} ${modelType}:`, 
+        `${lang === 'pt' ? 'Erro ao processar a resposta com o modelo' : 'Error processing response with model'} ${providerType}:`, 
         error
       );
-      return errorMessages[lang].processingError(modelType) as T;
+      return errorMessages[lang].processingError(providerType) as T;
     }
   }
 }

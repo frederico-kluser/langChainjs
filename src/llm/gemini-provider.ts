@@ -20,15 +20,15 @@ const messages = {
 };
 
 class GeminiProvider implements ILLMProvider {
-  async createModel(config?: ModelConfig) {
+  async createModel(config: ModelConfig) {
     return new ChatGoogleGenerativeAI({
-      model: "gemini-1.5-flash",
+      model: config?.model?.name || "gemini-1.5-flash",
       temperature: config?.temperature || 0,
       apiKey: process.env.GEMINI_API_KEY,
     });
   }
 
-  async getResponse<T = string>(query: string, config?: ModelConfig): Promise<LLMResponse<T>> {
+  async getResponse<T = string>(query: string, config: ModelConfig): Promise<LLMResponse<T>> {
     try {
       // Definir idioma padrão como português se não especificado
       const language = config?.language || 'pt';

@@ -11,12 +11,12 @@ const errorMessages = {
 };
 
 class OpenAIProvider implements ILLMProvider {
-  async createModel(config?: ModelConfig) {
+  async createModel(config: ModelConfig) {
     const language = config?.language || 'pt';
     const lang = language === 'en' ? 'en' : 'pt';
     
     const llm = new ChatOpenAI({
-      modelName: "gpt-3.5-turbo-0125",
+      modelName: config?.model?.name || "gpt-3.5-turbo-0125",
       maxTokens: config?.maxTokens || 1000,
       temperature: config?.temperature || 0,
     });
@@ -35,7 +35,7 @@ class OpenAIProvider implements ILLMProvider {
     return functionCallingModel.pipe(outputParser);
   }
 
-  async getResponse<T = string>(query: string, config?: ModelConfig): Promise<LLMResponse<T>> {
+  async getResponse<T = string>(query: string, config: ModelConfig): Promise<LLMResponse<T>> {
     try {
       const language = config?.language || 'pt';
       const lang = language === 'en' ? 'en' : 'pt';
