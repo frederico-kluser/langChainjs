@@ -1,31 +1,18 @@
 import 'dotenv/config';
 import { ChatOpenAI } from "@langchain/openai";
 import { JsonOutputFunctionsParser } from "langchain/output_parsers";
-import { ILLMProvider, LLMResponse, ModelConfig } from '../types';
-import { getSystemPrompt, extractJsonResponse, createCustomJsonSchema } from '../utils';
+import { LLMResponse, ModelConfig } from '../types';
+import { getSystemPrompt, createCustomJsonSchema } from '../utils';
+import { BaseLLMProvider } from './base-provider';
 
-// Mensagens por idioma
-const messages = {
-  pt: {
-    humanPromptIntro: 'Responda à pergunta abaixo.',
-    structuredResponse: 'A resposta deve ser estruturada conforme solicitado.',
-    simpleResponse: 'Responda de forma clara e concisa.',
-    questionPrefix: 'Pergunta:',
-    error: 'Ocorreu um erro ao processar sua solicitação com OpenAI.'
-  },
-  en: {
-    humanPromptIntro: 'Answer the question below.',
-    structuredResponse: 'The response must be structured as requested.',
-    simpleResponse: 'Answer clearly and concisely.',
-    questionPrefix: 'Question:',
-    error: 'An error occurred while processing your request with OpenAI.'
-  }
-};
+/**
+ * Provider do OpenAI com implementação especial para function calling
+ */
+class OpenAIProvider extends BaseLLMProvider {
+  protected readonly providerName = 'OpenAI';
 
-class OpenAIProvider implements ILLMProvider {
   async createModel(config: ModelConfig) {
-    const language = config?.language || 'pt';
-    const lang = language === 'en' ? 'en' : 'pt';
+    const language = this.getLanguage(config);
     
     const llm = new ChatOpenAI({
       modelName: config?.model?.name || "gpt-3.5-turbo-0125",
@@ -38,7 +25,7 @@ class OpenAIProvider implements ILLMProvider {
       const schema = createCustomJsonSchema(config.outputSchema, language);
       const functionCallingModel = llm.bind({
         functions: [schema],
-        function_call: { name: lang === 'pt' ? "resposta" : "response" }
+        function_call: { name: language === 'pt' ? "resposta" : "response" }
       });
       return functionCallingModel.pipe(new JsonOutputFunctionsParser());
     }
@@ -47,11 +34,13 @@ class OpenAIProvider implements ILLMProvider {
     return llm;
   }
 
+  /**
+   * Implementação especializada para suportar function calling do OpenAI
+   */
   async getResponse<T = string>(query: string, config: ModelConfig): Promise<LLMResponse<T>> {
     try {
-      const language = config?.language || 'pt';
-      const lang = language === 'en' ? 'en' : 'pt';
-      const msg = messages[lang];
+      const lang = this.getLanguage(config);
+      const msg = this.messages[lang];
       
       const model = await this.createModel(config);
       
@@ -59,13 +48,12 @@ class OpenAIProvider implements ILLMProvider {
       if (config?.outputSchema) {
         const result = await model.invoke(query) as any;
         
-        // Quando um schema personalizado é fornecido, devemos manter o objeto completo
-        // para garantir consistência com outros provedores
+        // Com function calling, já temos o objeto JSON
         return result as T;
       }
       
       // Para resposta simples usando prompt padrão
-      const customPrompt = getSystemPrompt(undefined, language);
+      const customPrompt = getSystemPrompt(undefined, lang);
       
       const response = await model.invoke([
         ["system", customPrompt],
@@ -77,9 +65,7 @@ ${msg.questionPrefix} ${query}`]
 
       return response.content.toString() as T;
     } catch (error) {
-      const lang = config?.language === 'en' ? 'en' : 'pt';
-      console.error(lang === 'pt' ? 'Erro ao invocar o modelo OpenAI:' : 'Error invoking the OpenAI model:', error);
-      return messages[lang].error as T;
+      return this.handleError<T>(error, config);
     }
   }
 }

@@ -1,5 +1,5 @@
 import { LLMResponse, ModelConfig, ModelType } from '../types';
-import LLMFactory from '../llm/factory';
+import { LLMProviderFactory } from '../llm/factory';
 import ora from 'ora';
 
 // Mensagens de erro por idioma
@@ -33,7 +33,7 @@ class LLMService {
     }).start();
     
     try {
-      const provider = LLMFactory.getProvider(providerType);
+      const provider = LLMProviderFactory.getProvider(providerType);
       const response = await provider.getResponse<T>(prompt, config);
       
       // Parar o spinner com sucesso
