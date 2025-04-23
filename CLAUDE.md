@@ -71,8 +71,7 @@ Este procedimento é absolutamente necessário devido a restrições de seguran�
 
 ## Comandos de Build
 - Executar aplicação: `npm run start`
-- Executar modelos específicos: `npm run claude`, `npm run openai`, `npm run ollama`, `npm run deepseek`, `npm run gemini`
-- Comando de atalho: `npm run ai` (alias para claude)
+- Executar testes: `npm run test:all` (todos os modelos), `npm run test:json` (teste com respostas JSON)
 
 ## Diretrizes de Estilo de Código
 - **Formatação**: Indentação de 2 espaços, ponto e vírgula, aspas duplas para strings, aspas simples para importações
@@ -88,11 +87,11 @@ Este procedimento é absolutamente necessário devido a restrições de seguran�
 - **Internacionalização**: Suporte para múltiplos idiomas nos prompts e respostas (português e inglês)
 
 ## Modelos Suportados
-- Claude (Anthropic): `npm run claude`
-- OpenAI: `npm run openai`
-- Gemini (Google): `npm run gemini`
-- DeepSeek: `npm run deepseek`
-- Ollama (modelos locais): `npm run ollama`
+- Claude (Anthropic)
+- OpenAI
+- Gemini (Google)
+- DeepSeek
+- Ollama (modelos locais)
 
 ## Configuração de Modelos
 ```typescript

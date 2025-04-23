@@ -154,22 +154,13 @@ console.log(result.population); // 3094325
 npm run start
 ```
 
-### Testando modelos específicos
+### Executando testes
 ```bash
-# Claude (Anthropic)
-npm run claude
+# Testar todos os modelos
+npm run test:all
 
-# OpenAI
-npm run openai
-
-# Gemini (Google)
-npm run gemini
-
-# DeepSeek
-npm run deepseek
-
-# Ollama (modelos locais)
-npm run ollama
+# Testar todos os modelos com resposta em formato JSON
+npm run test:json
 ```
 
 ## 🏗️ Arquitetura
@@ -192,10 +183,13 @@ src/
 │   └── factory.ts        # Factory para criar provedores
 ├── service/
 │   └── llm-service.ts    # Serviço central
-├── standalone/           # Scripts para testar cada provedor
 ├── types.ts              # Definições de tipos
 ├── utils.ts              # Funções auxiliares
 └── index.ts              # Ponto de entrada principal
+testes/
+├── resultados/           # Diretório com resultados dos testes
+├── runAll.ts             # Script para testar todos os modelos
+└── runAllJSON.ts         # Script para testar respostas JSON
 ```
 
 ## 📄 Configuração do Modelo
@@ -229,7 +223,7 @@ Para adicionar um novo provedor:
 1. Crie uma nova classe de provedor em `src/llm/[nome]-provider.ts`
 2. Implemente a interface `ILLMProvider`
 3. Adicione o provedor ao factory em `src/llm/factory.ts`
-4. Crie um script standalone em `src/standalone/[nome].ts`
+4. Adicione o provedor aos scripts de teste em `testes/runAll.ts` e `testes/runAllJSON.ts`
 
 ## 🤝 Contribuindo
 
