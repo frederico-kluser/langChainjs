@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import { LLMResponse, ModelConfig, ModelType } from './types';
 import llmService from './service/llm-service';
+import { populate } from 'dotenv';
 
 /**
  * Obtém resposta estruturada de qualquer modelo de IA
@@ -26,14 +27,16 @@ async function main() {
 		name: string;
 	}
 
-	console.log(`\n=== Consultando modelo: ${ModelType.OLLAMA} com schema personalizado ===`);
+	console.log(`\n=== Consultando modelo: ${ModelType.DEEPSEEK} com schema personalizado ===`);
 	const structuredResult = await getAIResponse<CountryInfo>(
 		'Provide information about the United States in a structured format',
-		ModelType.OLLAMA,
+		ModelType.DEEPSEEK,
 		{
 			temperature: 0,
 			outputSchema: {
 				name: 'Official name of the country',
+				populate: 'Population of the country',
+				area: 'Area of the country in square kilometers',
 			},
 			language: 'en',
 		},
