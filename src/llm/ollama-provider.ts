@@ -1,21 +1,25 @@
 import 'dotenv/config';
 import { ChatOllama } from '@langchain/ollama';
 import { ILLMProvider, LLMResponse, ModelConfig } from '../types';
-import { getPromptTemplate, parser, extractJsonResponse, getSystemPrompt, getParser } from '../utils';
+import { getSystemPrompt, extractJsonResponse } from '../utils';
 
 // Mensagens por idioma
 const messages = {
   pt: {
-    structuredPrompt: "Responda à pergunta com dados estruturados conforme solicitado.",
-    questionPrefix: "Pergunta:",
-    parseError: "Falha ao parsear resposta JSON, usando conteúdo direto",
-    error: "Ocorreu um erro ao processar a resposta com Ollama."
+    humanPromptIntro: 'Responda à pergunta abaixo.',
+    structuredResponse: 'A resposta deve ser estruturada conforme solicitado.',
+    simpleResponse: 'Responda de forma clara e concisa.',
+    questionPrefix: 'Pergunta:',
+    parseError: 'Falha ao parsear resposta JSON, usando conteúdo direto',
+    error: 'Ocorreu um erro ao processar sua solicitação com Ollama.'
   },
   en: {
-    structuredPrompt: "Answer the question with structured data as requested.",
-    questionPrefix: "Question:",
-    parseError: "Failed to parse JSON response, using direct content",
-    error: "An error occurred while processing your response with Ollama."
+    humanPromptIntro: 'Answer the question below.',
+    structuredResponse: 'The response must be structured as requested.',
+    simpleResponse: 'Answer clearly and concisely.',
+    questionPrefix: 'Question:',
+    parseError: 'Failed to parse JSON response, using direct content',
+    error: 'An error occurred while processing your request with Ollama.'
   }
 };
 
@@ -34,59 +38,33 @@ class OllamaProvider implements ILLMProvider {
       const lang = language === 'en' ? 'en' : 'pt';
       const msg = messages[lang];
       
-      const llm = await this.createModel(config);
+      const model = await this.createModel(config);
       
-      // Para schemas personalizados, usamos uma abordagem direta
-      if (config?.outputSchema) {
-        const customPrompt = getSystemPrompt(config.outputSchema, language);
-        
-        const response = await llm.invoke([
-          ["system", customPrompt],
-          ["human", `${msg.structuredPrompt} 
-${msg.questionPrefix} ${query}`]
-        ]);
-        
-        const content = typeof response.content === 'string'
-          ? response.content
-          : JSON.stringify(response.content);
-          
-        return extractJsonResponse<T>(content, config.outputSchema, language);
-      }
+      // Usa o prompt personalizado ou o padrão
+      const customPrompt = getSystemPrompt(config?.outputSchema, language);
       
-      // Para resposta em texto simples
-      const customParser = getParser(language);
-      const promptTemplate = getPromptTemplate(language);
-      const prompt = await promptTemplate.format({
-        question: query,
-        formatInstructions: customParser.getFormatInstructions(),
-      });
+      const response = await model.invoke([
+        ["system", customPrompt],
+        ["human", `${msg.humanPromptIntro}
+${config?.outputSchema ? msg.structuredResponse : msg.simpleResponse}
 
-      const response = await llm.invoke(prompt);
-      const content = typeof response.content === 'string' 
-        ? response.content 
+${msg.questionPrefix} ${query}`]
+      ]);
+
+      const content = typeof response.content === 'string'
+        ? response.content
         : JSON.stringify(response.content);
-      
-      // Tenta extrair o texto da resposta
-      try {
-        const parsed = await customParser.parse(content);
-        // Cada idioma tem um parser diferente que retornará o campo correto
-        if (parsed) {
-          if (lang === 'pt' && 'resposta' in parsed) {
-            return parsed.resposta as T;
-          } else if (lang === 'en' && 'response' in parsed) {
-            return parsed.response as T;
-          }
-        }
-      } catch (parseError) {
-        // Se falhar ao parsear, retorna o conteúdo bruto
-        console.log(msg.parseError);
+
+      // Para resposta não estruturada (texto simples)
+      if (!config?.outputSchema) {
+        return content as T;
       }
-      
-      // Se o parser falhar ou não tiver uma resposta estruturada, retorna o conteúdo como está
-      return content as T;
+
+      // Para resposta estruturada com schema
+      return extractJsonResponse<T>(content, config?.outputSchema, language);
     } catch (error) {
-      const lang = (config?.language === 'en') ? 'en' : 'pt';
-      console.error(lang === 'pt' ? 'Erro ao processar a resposta com Ollama:' : 'Error processing response with Ollama:', error);
+      const lang = config?.language === 'en' ? 'en' : 'pt';
+      console.error(lang === 'pt' ? 'Erro ao invocar o modelo Ollama:' : 'Error invoking the Ollama model:', error);
       return messages[lang].error as T;
     }
   }

@@ -17,6 +17,9 @@ export async function getAIResponse<T = string>(prompt: string, config?: ModelCo
 				provider: ModelType.OPENAI,
 				name: 'gpt-4o',
 			},
+			outputSchema: {
+				resposta: 'string',
+			},
 		},
 	);
 }

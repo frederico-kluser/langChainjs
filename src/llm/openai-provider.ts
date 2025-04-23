@@ -2,12 +2,24 @@ import 'dotenv/config';
 import { ChatOpenAI } from "@langchain/openai";
 import { JsonOutputFunctionsParser } from "langchain/output_parsers";
 import { ILLMProvider, LLMResponse, ModelConfig } from '../types';
-import { getJsonSchema, createCustomJsonSchema, extractJsonResponse } from '../utils';
+import { getSystemPrompt, extractJsonResponse, createCustomJsonSchema } from '../utils';
 
-// Mensagens de erro por idioma
-const errorMessages = {
-  pt: "Ocorreu um erro ao processar sua solicitação com OpenAI.",
-  en: "An error occurred while processing your request with OpenAI."
+// Mensagens por idioma
+const messages = {
+  pt: {
+    humanPromptIntro: 'Responda à pergunta abaixo.',
+    structuredResponse: 'A resposta deve ser estruturada conforme solicitado.',
+    simpleResponse: 'Responda de forma clara e concisa.',
+    questionPrefix: 'Pergunta:',
+    error: 'Ocorreu um erro ao processar sua solicitação com OpenAI.'
+  },
+  en: {
+    humanPromptIntro: 'Answer the question below.',
+    structuredResponse: 'The response must be structured as requested.',
+    simpleResponse: 'Answer clearly and concisely.',
+    questionPrefix: 'Question:',
+    error: 'An error occurred while processing your request with OpenAI.'
+  }
 };
 
 class OpenAIProvider implements ILLMProvider {
@@ -21,49 +33,56 @@ class OpenAIProvider implements ILLMProvider {
       temperature: config?.temperature || 0,
     });
 
-    // Usa schema personalizado se fornecido, ou o schema padrão
-    const schema = config?.outputSchema 
-      ? createCustomJsonSchema(config.outputSchema, language)
-      : getJsonSchema(language);
-
-    const functionCallingModel = llm.bind({
-      functions: [schema],
-      function_call: { name: lang === 'pt' ? "resposta" : "response" }
-    });
-
-    const outputParser = new JsonOutputFunctionsParser();
-    return functionCallingModel.pipe(outputParser);
+    // Se tem schema personalizado, use function calling
+    if (config?.outputSchema) {
+      const schema = createCustomJsonSchema(config.outputSchema, language);
+      const functionCallingModel = llm.bind({
+        functions: [schema],
+        function_call: { name: lang === 'pt' ? "resposta" : "response" }
+      });
+      return functionCallingModel.pipe(new JsonOutputFunctionsParser());
+    }
+    
+    // Caso contrário, retorne o modelo regular
+    return llm;
   }
 
   async getResponse<T = string>(query: string, config: ModelConfig): Promise<LLMResponse<T>> {
     try {
       const language = config?.language || 'pt';
       const lang = language === 'en' ? 'en' : 'pt';
+      const msg = messages[lang];
       
-      const chain = await this.createModel(config);
-      const result = await chain.invoke(query) as any;
+      const model = await this.createModel(config);
       
-      // Para schemas personalizados
+      // Se estamos usando function calling (output schema)
       if (config?.outputSchema) {
-        if ((lang === 'pt' && result.resposta && typeof result.resposta === 'object') ||
-            (lang === 'en' && result.response && typeof result.response === 'object')) {
+        const result = await model.invoke(query) as any;
+        
+        // Extrair a resposta do formato de function calling
+        if ((lang === 'pt' && result.resposta) || (lang === 'en' && result.response)) {
           return (lang === 'pt' ? result.resposta : result.response) as T;
         }
-        // Já está no formato correto
+        
         return result as T;
       }
       
-      // Para resposta de texto simples
-      if ((lang === 'pt' && result.resposta && typeof result.resposta === 'string') ||
-          (lang === 'en' && result.response && typeof result.response === 'string')) {
-        return (lang === 'pt' ? result.resposta : result.response) as T;
-      }
+      // Para resposta simples usando prompt padrão
+      const customPrompt = getSystemPrompt(undefined, language);
       
-      return result as T;
+      const response = await model.invoke([
+        ["system", customPrompt],
+        ["human", `${msg.humanPromptIntro}
+${msg.simpleResponse}
+
+${msg.questionPrefix} ${query}`]
+      ]);
+
+      return response.content.toString() as T;
     } catch (error) {
-      const lang = (config?.language === 'en') ? 'en' : 'pt';
-      console.error(lang === 'pt' ? "Erro ao invocar o modelo OpenAI:" : "Error invoking the OpenAI model:", error);
-      return errorMessages[lang] as T;
+      const lang = config?.language === 'en' ? 'en' : 'pt';
+      console.error(lang === 'pt' ? 'Erro ao invocar o modelo OpenAI:' : 'Error invoking the OpenAI model:', error);
+      return messages[lang].error as T;
     }
   }
 }
