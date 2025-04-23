@@ -40,7 +40,8 @@ async function main() {
 }
 
 // Executar como script standalone
-if (import.meta.url === import.meta.resolve('./index.ts')) {
+if (import.meta.url === import.meta.url.split('#')[0] && 
+    process.argv[1]?.split(/[\/\\]/).pop() === 'index.ts') {
 	main().catch(console.error);
 }
 
