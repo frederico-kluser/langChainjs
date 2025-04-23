@@ -16,8 +16,15 @@ const responseSchemas = {
   })
 };
 
+/**
+ * Obtém o idioma a ser usado, padronizando para pt ou en
+ */
+export function getLanguage(language?: string): 'pt' | 'en' {
+  return language === 'en' ? 'en' : 'pt';
+}
+
 export function getParser(language: string = 'pt') {
-  const lang = language === 'en' ? 'en' : 'pt';
+  const lang = getLanguage(language);
   return StructuredOutputParser.fromZodSchema(responseSchemas[lang]);
 }
 
@@ -65,7 +72,7 @@ If the question is about a specific topic, provide relevant and accurate informa
 
 export function getSystemPrompt(outputSchema?: Record<string, any>, language: string = 'pt'): string {
   // Verificar se o idioma é suportado, caso contrário usar português
-  const lang = language === 'en' ? 'en' : 'pt';
+  const lang = getLanguage(language);
   
   if (!outputSchema) {
     return systemPrompts[lang].default;
@@ -100,7 +107,7 @@ Question: {question}`
 };
 
 export function getPromptTemplate(language: string = 'pt'): PromptTemplate {
-  const lang = language === 'en' ? 'en' : 'pt';
+  const lang = getLanguage(language);
   return PromptTemplate.fromTemplate(promptTemplates[lang]);
 }
 
@@ -128,7 +135,7 @@ const jsonSchemas = {
 };
 
 export function getJsonSchema(language: string = 'pt') {
-  const lang = language === 'en' ? 'en' : 'pt';
+  const lang = getLanguage(language);
   return jsonSchemas[lang];
 }
 
@@ -138,7 +145,7 @@ export const jsonSchema = getJsonSchema();
 export function createCustomJsonSchema(outputSchema: Record<string, any>, language: string = 'pt') {
   // Cria um schema personalizado para function calling
   const properties: Record<string, any> = {};
-  const lang = language === 'en' ? 'en' : 'pt';
+  const lang = getLanguage(language);
   
   // Para cada campo no schema de saída, cria uma propriedade correspondente
   Object.entries(outputSchema).forEach(([key, description]) => {
@@ -215,7 +222,7 @@ export async function extractJsonResponse<T = string>(
   outputSchema?: Record<string, any>,
   language: string = 'pt'
 ): Promise<T> {
-  const lang = language === 'en' ? 'en' : 'pt';
+  const lang = getLanguage(language);
   
   try {
     if (typeof content !== 'string') {
@@ -239,7 +246,36 @@ export async function extractJsonResponse<T = string>(
       // Se o objeto analisado contém a maioria das chaves do schema
       const matchingKeys = schemaKeys.filter(key => contentKeys.includes(key));
       if (matchingKeys.length >= schemaKeys.length * 0.5) {
-        return parsedContent as T;
+        // Converter campos numéricos com base no schema
+        const result = { ...parsedContent };
+        
+        // Verificar campos que deveriam ser números mas vieram como strings
+        Object.entries(outputSchema).forEach(([key, description]) => {
+          if (!result[key]) return;
+          
+          // Critérios para detectar se deveria ser um número
+          const shouldBeNumber = 
+            (lang === 'pt' && (
+              key.includes("numero") || key.includes("populacao") || key.includes("quantidade") || 
+              key.includes("valor") || key.includes("total") || key.includes("idade")
+            )) || 
+            (lang === 'en' && (
+              key.includes("number") || key.includes("population") || key.includes("quantity") || 
+              key.includes("amount") || key.includes("value") || key.includes("total") || 
+              key.includes("age") || key.includes("count")
+            ));
+          
+          // Se deveria ser número mas veio como string, converter
+          if (shouldBeNumber && typeof result[key] === 'string') {
+            // Remove caracteres não numéricos e converte para número
+            const numericString = result[key].replace(/\D/g, '');
+            if (numericString) {
+              result[key] = parseInt(numericString, 10);
+            }
+          }
+        });
+        
+        return result as T;
       }
     }
     

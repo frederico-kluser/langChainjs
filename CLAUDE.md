@@ -71,7 +71,11 @@ Este procedimento é absolutamente necessário devido a restrições de seguran�
 
 ## Comandos de Build
 - Executar aplicação: `npm run start`
-- Executar testes: `npm run test:all` (todos os modelos), `npm run test:json` (teste com respostas JSON)
+- Executar testes de modelos: `npm run test:all` (todos os modelos), `npm run test:json` (teste com respostas JSON)
+- Executar testes unitários: `npm run test:unit`
+- Executar testes de integração: `npm run test:integration`
+- Executar todos os testes: `npm run test`
+- Executar com cobertura: `npm run test:coverage`
 
 ## Diretrizes de Estilo de Código
 - **Formatação**: Indentação de 2 espaços, ponto e vírgula, aspas duplas para strings, aspas simples para importações

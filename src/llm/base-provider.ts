@@ -1,6 +1,6 @@
 import 'dotenv/config';
 import { ILLMProvider, LLMResponse, ModelConfig } from '../types';
-import { getSystemPrompt, extractJsonResponse } from '../utils';
+import { getSystemPrompt, extractJsonResponse, getLanguage } from '../utils';
 
 // Mensagens comuns para todos os providers
 const messagesBase = {
@@ -52,7 +52,7 @@ export abstract class BaseLLMProvider implements ILLMProvider {
   /**
    * Atualiza as mensagens de erro com o nome do provedor
    */
-  private updateErrorMessages(): void {
+  protected updateErrorMessages(): void {
     this.messages.pt.error = `Ocorreu um erro ao processar sua solicitação com ${this.providerName}.`;
     this.messages.en.error = `An error occurred while processing your request with ${this.providerName}.`;
   }
@@ -61,7 +61,7 @@ export abstract class BaseLLMProvider implements ILLMProvider {
    * Determina o idioma a ser usado
    */
   protected getLanguage(config?: ModelConfig): 'pt' | 'en' {
-    return config?.language === 'en' ? 'en' : 'pt';
+    return getLanguage(config?.language);
   }
 
   /**

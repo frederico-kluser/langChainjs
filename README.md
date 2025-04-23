@@ -3,6 +3,7 @@
 [![License: ISC](https://img.shields.io/badge/License-ISC-blue.svg)](https://opensource.org/licenses/ISC)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8.3-blue)](https://www.typescriptlang.org/)
 [![LangChain](https://img.shields.io/badge/LangChain-0.3.21-green)](https://www.langchain.com/)
+[![Tests](https://img.shields.io/badge/Tests-Vitest-green)](https://vitest.dev/)
 
 Uma biblioteca TypeScript que oferece uma API unificada e consistente para interagir com diferentes provedores de modelos de linguagem (LLMs) através do LangChain.
 
@@ -15,6 +16,7 @@ Uma biblioteca TypeScript que oferece uma API unificada e consistente para inter
 - 🛠️ **Altamente Configurável**: Controle tokens, temperatura e outros parâmetros
 - 🔍 **TypeScript Nativo**: Tipos fortes e suporte a inferência de tipos
 - 🧪 **Tratamento de Erros**: Respostas de erro consistentes e informativas
+- 📋 **Testes Automatizados**: Testes unitários e de integração com Vitest
 
 ## 📋 Requisitos
 
@@ -147,19 +149,40 @@ console.log(result.capital); // "Brasília"
 console.log(result.population); // 3094325
 ```
 
-## 🧪 Exemplos de Uso
+## 🧪 Testes
+
+Este projeto inclui testes unitários e de integração usando Vitest.
+
+```bash
+# Executar todos os testes
+npm run test
+
+# Executar apenas testes unitários
+npm run test:unit
+
+# Executar apenas testes de integração
+npm run test:integration
+
+# Executar testes com cobertura
+npm run test:coverage
+
+# Executar testes em modo watch
+npm run test:watch
+```
+
+## 🧩 Exemplos de Uso
 
 ### Executando a aplicação principal
 ```bash
 npm run start
 ```
 
-### Executando testes
+### Executando testes com todos os modelos
 ```bash
-# Testar todos os modelos
+# Teste básico com todos os modelos
 npm run test:all
 
-# Testar todos os modelos com resposta em formato JSON
+# Teste com resposta em formato JSON
 npm run test:json
 ```
 
@@ -175,6 +198,7 @@ O projeto segue uma arquitetura modular com os seguintes componentes principais:
 ```
 src/
 ├── llm/                  # Implementações de provedores
+│   ├── base-provider.ts  # Classe base para todos os provedores
 │   ├── claude-provider.ts
 │   ├── openai-provider.ts
 │   ├── gemini-provider.ts
@@ -190,6 +214,9 @@ testes/
 ├── resultados/           # Diretório com resultados dos testes
 ├── runAll.ts             # Script para testar todos os modelos
 └── runAllJSON.ts         # Script para testar respostas JSON
+__tests__/
+├── unit/                 # Testes unitários
+└── integration/          # Testes de integração
 ```
 
 ## 📄 Configuração do Modelo
@@ -220,10 +247,11 @@ A biblioteca suporta os seguintes modelos:
 
 Para adicionar um novo provedor:
 
-1. Crie uma nova classe de provedor em `src/llm/[nome]-provider.ts`
-2. Implemente a interface `ILLMProvider`
+1. Crie uma nova classe de provedor em `src/llm/[nome]-provider.ts` extendendo BaseLLMProvider
+2. Implemente o método `createModel` e defina o `providerName`
 3. Adicione o provedor ao factory em `src/llm/factory.ts`
 4. Adicione o provedor aos scripts de teste em `testes/runAll.ts` e `testes/runAllJSON.ts`
+5. Adicione testes unitários e de integração para o novo provedor
 
 ## 🤝 Contribuindo
 
