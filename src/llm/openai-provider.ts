@@ -59,11 +59,8 @@ class OpenAIProvider implements ILLMProvider {
       if (config?.outputSchema) {
         const result = await model.invoke(query) as any;
         
-        // Extrair a resposta do formato de function calling
-        if ((lang === 'pt' && result.resposta) || (lang === 'en' && result.response)) {
-          return (lang === 'pt' ? result.resposta : result.response) as T;
-        }
-        
+        // Quando um schema personalizado é fornecido, devemos manter o objeto completo
+        // para garantir consistência com outros provedores
         return result as T;
       }
       
